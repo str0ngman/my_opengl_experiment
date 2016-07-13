@@ -3,16 +3,13 @@
 #include<GLFW/glfw3.h>
 #include<SOIL.h>
 
-#include"OE_shader.h"
-#include"utils.h"
-#include"myGeometry.h"
+#include"OE_shader.h"  //shader loader and shader linker
+#include"utils.h"      //key_callback
+#include"myGeometry.h" //vertices coords, EBO indices.
 
-
+//draw a single cube
 GLFWwindow* window;
 const int WIDTH = 640, HEIGHT = 480;
-
-
-
 
 int main(int argc, char* argv[])
 {
@@ -47,14 +44,19 @@ int main(int argc, char* argv[])
 
 	GLuint VAO0;
 	GLuint VBO0;
+	GLuint EBO0;
 
 	glGenVertexArrays(1, &VAO0);
 	glGenBuffers(1, &VBO0);
+	glGenBuffers(1, &EBO0);
 
 	glBindVertexArray(VAO0);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO0);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), 0);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_with_texCoord), cube_with_texCoord, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO0);
+
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_index), cube_index, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), 0);
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -69,7 +71,7 @@ int main(int argc, char* argv[])
 
 		oeShader.use_program();
 		glBindVertexArray(VAO0);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
