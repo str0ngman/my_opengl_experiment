@@ -30,7 +30,8 @@ OE_shader::OE_shader(const GLchar* path1,
 		istreambuf_iterator<char>());
 	const char* vertexSource = vstring.c_str();
 	const char* fragmentSource = fstring.c_str();
-
+	//cout << vertexSource << endl;
+	//cout << fragmentSource << endl;
 	//2. compile shaders 
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
