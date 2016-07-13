@@ -1,7 +1,12 @@
 #include<iostream>
 #include<GL/glew.h>
 #include<GLFW/glfw3.h>
+#include<SOIL.h>
+
+#include"OE_shader.h"
 #include"utils.h"
+#include"myGeometry.h"
+
 
 GLFWwindow* window;
 const int WIDTH = 640, HEIGHT = 480;
@@ -24,6 +29,8 @@ int main(int argc, char* argv[])
 	glewExperimental = GL_TRUE;
 	glewInit();
 
+	OE_shader oeShader("../shaders/01.vert", "../shaders/01.frag");
+	
 	int width = 0, height = 0;
 	glfwGetFramebufferSize(window, &width, &height);
 	glfwSetKeyCallback(window, key_callback);
