@@ -17,6 +17,14 @@ GLfloat cube_with_texCoord[] = {
 	0.2f, 0.4f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f    // Top Left
 };
 
+GLfloat sample_cube[] = {
+	// Positions          // Colors           // Texture Coords
+	0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // Top Right
+	0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Bottom Right
+	-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // Bottom Left
+	-0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // Top Left 
+};
+
 GLint cube_index[] = {
 	0,1,2,
 	0,2,3
