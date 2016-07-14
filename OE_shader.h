@@ -9,7 +9,7 @@ public:
 	void use_program();
 
 public:
-	GLuint shaderProgram;
+	GLuint Program;
 };
 
 #endif //SHADER_H

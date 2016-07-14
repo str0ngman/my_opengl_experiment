@@ -62,17 +62,17 @@ OE_shader::OE_shader(const GLchar* path1,
 	}
 
 	//4. create , attach, link program
-	this->shaderProgram = glCreateProgram();
-	glAttachShader(this->shaderProgram, vertexShader);
-	glAttachShader(this->shaderProgram, fragmentShader);
-	glLinkProgram(this->shaderProgram);
+	this->Program = glCreateProgram();
+	glAttachShader(this->Program, vertexShader);
+	glAttachShader(this->Program, fragmentShader);
+	glLinkProgram(this->Program);
 
 
 	//5. check program error
-	glGetProgramiv(this->shaderProgram, GL_LINK_STATUS, &success);
+	glGetProgramiv(this->Program, GL_LINK_STATUS, &success);
 	if (!success)
 	{
-		glGetProgramInfoLog(this->shaderProgram, 512, NULL, infoLog);
+		glGetProgramInfoLog(this->Program, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
 			<< "infoLog" << infoLog << std::endl;
 	}
@@ -83,6 +83,6 @@ OE_shader::OE_shader(const GLchar* path1,
 
 }
 void OE_shader::use_program(){
-	glUseProgram(this->shaderProgram);
+	glUseProgram(this->Program);
 }
 

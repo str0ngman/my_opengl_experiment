@@ -1,119 +1,173 @@
-#include<iostream>
-#include<GL/glew.h> //glew
-#include<GLFW/glfw3.h> //glfw
-#include<SOIL.h> //lib: load image
+/*
+commit : cube with 2 textures
+*/
 
-#include"OE_shader.h"  //shader loader and shader linker
-#include"utils.h"      //key_callback(), etc
-#include"myGeometry.h" //vertices coords, EBO indices.
+#include <iostream>
 
-//draw a single cube with textures
-GLFWwindow* window;
-const int WIDTH = 640, HEIGHT = 480;
+// GLEW
 
-int main(int argc, char* argv[])
+#include <GL/glew.h>
+
+// GLFW
+#include <GLFW/glfw3.h>
+
+// Other Libs
+#include <SOIL.h>
+
+// Other includes
+#include "OE_shader.h"
+
+#include "utils.h"
+#include "myGeometry.h"
+// Window dimensions
+const GLuint WIDTH = 800, HEIGHT = 600;
+
+// The MAIN function, from here we start the application and run the game loop
+int main()
 {
-	std::system("cls");
-	std::cout << "/********textured Cube move experiment*********/\n\n";
-	std::cout << "[draw a cube with texture]\n";
-	//init glew, glfw,set the window parameters
-	
-	std::cout << "glfwInit\n" << std::endl;
-	
+	// Init GLFW
 	glfwInit();
+	// Set all the required options for GLFW
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-	window = glfwCreateWindow(WIDTH, HEIGHT, "textured Cube move experiment", nullptr, nullptr);
-	
+	// Create a GLFWwindow object that we can use for GLFW's functions
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "LearnOpenGL", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
+
+	// Set the required callback functions
+	glfwSetKeyCallback(window, key_callback);
+
+	// Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
 	glewExperimental = GL_TRUE;
-	
+	// Initialize GLEW to setup the OpenGL Function pointers
 	glewInit();
 
-	int width = 0, height = 0;
-	glfwGetFramebufferSize(window, &width, &height);
-	glfwSetKeyCallback(window, key_callback);
-	glViewport(0, 0, width, height);
-	
-	
-	OE_shader oeShader("../texturedCube_move/shaders/vertex_ct.glsl", 
+	// Define the viewport dimensions
+	glViewport(0, 0, WIDTH, HEIGHT);
+
+
+	// Build and compile our shader program
+	OE_shader ourShader("../texturedCube_move/shaders/vertex_ct.glsl",
 		"../texturedCube_move/shaders/fragment_ct.glsl");
-	std::cout << "enterering drawing loop:\n";
 
-	GLuint VAO0;
-	GLuint VBO0;
-	GLuint EBO0;
-	glGenVertexArrays(1, &VAO0);
-	glGenBuffers(1, &VBO0);
-	glGenBuffers(1, &EBO0);
 
-	glBindVertexArray(VAO0);
-	
-	glBindBuffer(GL_ARRAY_BUFFER, VBO0);
+	// Set up vertex data (and buffer(s)) and attribute pointers
+	GLfloat vertices[] = {
+		// Positions          // Colors           // Texture Coords
+		0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // Top Right
+		0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Bottom Right
+		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // Bottom Left
+		-0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // Top Left 
+	};
+	GLuint indices[] = {  // Note that we start from 0!
+		0, 1, 3, // First Triangle
+		1, 2, 3  // Second Triangle
+	};
+	GLuint VBO, VAO, EBO;
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
+
+	glBindVertexArray(VAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_with_texCoord), cube_with_texCoord, GL_STATIC_DRAW);
-	
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_index), cube_index, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), 0);
+	// Position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
-
+	// Color attribute
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(1);
-
+	// TexCoord attribute
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(2);
 
-	glBindVertexArray(0);
+	glBindVertexArray(0); // Unbind VAO
+
 
 	// Load and create a texture 
-	GLuint texture0;
-	glGenTextures(1, &texture0);
-	glBindTexture(GL_TEXTURE_2D, texture0);
-	// Set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// Set texture wrapping to GL_REPEAT (usually basic wrapping method)
+	GLuint texture1;
+	GLuint texture2;
+	// ====================
+	// Texture 1
+	// ====================
+	glGenTextures(1, &texture1);
+	glBindTexture(GL_TEXTURE_2D, texture1); // All upcoming GL_TEXTURE_2D operations now have effect on our texture object
+	// Set our texture parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// Set texture wrapping to GL_REPEAT
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// Set texture filtering parameters
+	// Set texture filtering
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	
-	int image_w, image_h;
-	unsigned char* image0 = SOIL_load_image("../texturedCube_move/textures/container.jpg", 
-		&image_w, &image_h, 0, SOIL_LOAD_RGB);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_w, image_h, 0, GL_RGB, GL_UNSIGNED_BYTE, image0);
+	// Load, create texture and generate mipmaps
+	int width, height;
+	unsigned char* image = SOIL_load_image("../texturedCube_move/textures/container.jpg", &width, &height, 0, SOIL_LOAD_RGB);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	glGenerateMipmap(GL_TEXTURE_2D);
-	SOIL_free_image_data(image0);
+	SOIL_free_image_data(image);
+	glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture when done, so we won't accidentily mess up our texture.
+	// ===================
+	// Texture 2
+	// ===================
+	glGenTextures(1, &texture2);
+	glBindTexture(GL_TEXTURE_2D, texture2);
+	// Set our texture parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// Set texture filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Load, create texture and generate mipmaps
+	image = SOIL_load_image("../texturedCube_move/textures/awesomeface.png", &width, &height, 0, SOIL_LOAD_RGB);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	SOIL_free_image_data(image);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	
 
-	
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	// Game loop
 	while (!glfwWindowShouldClose(window))
 	{
+		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
-	
+
+		// Render
+		// Clear the colorbuffer
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glBindTexture(GL_TEXTURE_2D, texture0);
+		// Activate shader
+		ourShader.use_program();
 
-		oeShader.use_program();
-		glBindVertexArray(VAO0);
+		// Bind Textures using texture units
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture1);
+		glUniform1i(glGetUniformLocation(ourShader.Program, "ourTexture1"), 0);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture2);
+		glUniform1i(glGetUniformLocation(ourShader.Program, "ourTexture2"), 1);
+
+		// Draw container
+		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
+		// Swap the screen buffers
 		glfwSwapBuffers(window);
 	}
-	glDeleteVertexArrays(1, &VAO0);
-	glDeleteBuffers(1, &VBO0);
-	glDeleteBuffers(1, &EBO0);
-
+	// Properly de-allocate all resources once they've outlived their purpose
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	// Terminate GLFW, clearing any resources allocated by GLFW.
 	glfwTerminate();
-	std::cout << "Program ends here\n";
-	
 	return 0;
 }
+
