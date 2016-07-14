@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
 	glBindVertexArray(VAO0);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, VBO0);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(sample_cube), sample_cube, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_with_texCoord), cube_with_texCoord, GL_STATIC_DRAW);
 	
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO0);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_index), cube_index, GL_STATIC_DRAW);
@@ -81,15 +81,11 @@ int main(int argc, char* argv[])
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	
 	int image_w, image_h;
-	//unsigned char* image0 = SOIL_load_image("../texturedCube_move/textures/container.jpg", 
-		//&image_w, &image_h, 0, SOIL_LOAD_RGB);
-
 	unsigned char* image0 = SOIL_load_image("../texturedCube_move/textures/container.jpg", 
 		&image_w, &image_h, 0, SOIL_LOAD_RGB);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_w, image_h, 0, GL_RGB, GL_UNSIGNED_BYTE, image0);
 	glGenerateMipmap(GL_TEXTURE_2D);
-	
 	SOIL_free_image_data(image0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	
