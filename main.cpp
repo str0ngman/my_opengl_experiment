@@ -1,16 +1,5 @@
 /*
-commit : transformation exercise
-
-1. [done]
-Using the latest transformtion on the container, 
-try switching the order around by first rotation and then translation.
-see what happens and try to reason why this happens.
-
-2. [ 
-Try drawing a second container with anoter call to glDrawElements 
-but place it at a different position using transformations only.
-Make sure this second container is placed at the top-left of the window and instad of 
-rotating, scale it over time.
+commit : coordinate system
 
 */
 
@@ -30,13 +19,14 @@ rotating, scale it over time.
 
 const GLuint WIDTH = 760, HEIGHT = 760;
 GLfloat mixValue = 0.2f;
+GLfloat x_rotate = 0.1f;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
 int main()
 {
 	std::system("cls");
 	std::cout << "/********textured Cube move experiment*********/\n\n";
-	std::cout << "[draw a cube with texture]\n";
+	std::cout << "enter Coordinate system\n";
 	//init glew, glfw,set the window parameters
 
 	std::cout << "glfwInit\n" << std::endl;
@@ -66,8 +56,8 @@ int main()
 	/*reverse face by modifying fragment:fragment_tex_ex1.glsl*/
 
 	std::cout << "enterering drawing loop:\n";
-	OE_shader oeShader("../texturedCube_move/shaders/vertex_transformation_translation.glsl",
-		"../texturedCube_move/shaders/fragment_tex_ex4.glsl");
+	OE_shader oeShader("../texturedCube_move/shaders/vertex_coord_system.glsl",
+		"../texturedCube_move/shaders/fragment_coord_system.glsl");
 
 
 	GLuint VBO, VAO, EBO;
@@ -137,6 +127,7 @@ int main()
 	glBindTexture(GL_TEXTURE_2D, 0);
 	
 	// Game loop
+
 	while (!glfwWindowShouldClose(window))
 	{
 	
@@ -159,30 +150,28 @@ int main()
 
 		//Activate shader
 		oeShader.use_program();
+		glm::mat4 model;
+		glm::mat4 view;
+		glm::mat4 projection;
+		model = glm::rotate(model, x_rotate, glm::vec3(1.0f, 0.0f, 0.0f));
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		projection = glm::perspective(45.0f, (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
+		// Get their uniform location
+		GLint modelLoc = glGetUniformLocation(oeShader.Program, "model");
+		GLint viewLoc = glGetUniformLocation(oeShader.Program, "view");
+		GLint projLoc = glGetUniformLocation(oeShader.Program, "projection");
+		// Pass them to the shaders
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		// Note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-		glm::mat4 transform;
-
-		//first container
-		//---------------------------------------------------
-		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-		transform = glm::rotate(transform, (GLfloat)glfwGetTime() * 5.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-		GLint transformLoc = glGetUniformLocation(oeShader.Program, "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
-		//bind Textures using texture units
-		glUniform1f(glGetUniformLocation(oeShader.Program, "mixValue"), mixValue);
+		// Draw container
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-		//second container
-		//----------------------------------------------------
-		transform = glm::mat4();//reset
-		transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
-		GLfloat scaleAmount = sin(glfwGetTime());
-		transform = glm::scale(transform, glm::vec3(scaleAmount, scaleAmount, scaleAmount));
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
+		//Swap the screen buffers
 		glfwSwapBuffers(window);
 	}
 	// Properly de-allocate all resources once they've outlived their purpose
@@ -201,12 +190,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	// Change value of uniform with arrow keys (sets amount of textre mix)
 	if (key == GLFW_KEY_UP && action == GLFW_PRESS)
 	{
+		x_rotate += 0.1f;
+		
 		mixValue += 0.1f;
 		if (mixValue >= 1.0f)
 			mixValue = 1.0f;
 	}
 	if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
 	{
+		x_rotate -= 0.1f;
 		mixValue -= 0.1f;
 		if (mixValue <= 0.0f)
 			mixValue = 0.0f;
