@@ -1,32 +1,8 @@
 /*
-commit : texture Learnopengl.com exercies
+commit : basic transformation
 
-exerciese:
-1.[done]
-make sure only the happy looks in the other/reverse direction 
-by changing the fragment shader. solution: fragment_tex_ex1.glsl
-
-2.[done]
-Experiment with the different texture wrapping methods by specifying texture coordinates
-in the range 0.0f to 2.0 instead of 0.0f to 1.0f.
-See if you can display 4 smiley faces on a single container image clamped at its edge.
-
-
-3.[done]
-Try to display only the center pixel of the texture image on the rectangle
-in such a way that the individual pixels are getting visible by changing in the 
-texture coordinates.
-Try to set the texture filtering method to GL_NEAREST to see the pixels more 
-clearly.
-
-4.[in progress]
-Use a uniform variable as the mix functions's third parameter to vary the amount
-the two textures are visible.
-Use the up and down arrow keys to change how much the container or the smiley face
-is visible.
-soluton:fragment_tex_ex4.glsl by adding a uniform 
-
-at this point, we move key_callback out of the utils.h , because it is using some global vars
+description: previously , just finished texture chapter. ready to jump into transformation.
+at the same time, add math lib into the project
 */
 
 #include <iostream>
@@ -34,12 +10,16 @@ at this point, we move key_callback out of the utils.h , because it is using som
 #include <GLFW/glfw3.h>
 #include <SOIL.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 // Other includes
 #include "OE_shader.h"
 #include "utils.h"
 #include "myGeometry.h"
 
-const GLuint WIDTH = 640, HEIGHT = 480;
+const GLuint WIDTH = 760, HEIGHT = 760;
 GLfloat mixValue = 0.2f;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
@@ -77,7 +57,7 @@ int main()
 	/*reverse face by modifying fragment:fragment_tex_ex1.glsl*/
 
 	std::cout << "enterering drawing loop:\n";
-	OE_shader oeShader("../texturedCube_move/shaders/vertex_ct.glsl",
+	OE_shader oeShader("../texturedCube_move/shaders/vertex_transformation_translation.glsl",
 		"../texturedCube_move/shaders/fragment_tex_ex4.glsl");
 
 
@@ -147,8 +127,14 @@ int main()
 	SOIL_free_image_data(image1);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	
-	// Game loop
+	//Translation test
+	std::cout << "\n\n------transformation test--------------\n";
+	glm::mat4 trans;
+	trans = glm::rotate(trans, 90.0f, glm::vec3(0.0, 0.0, 1.0));
+	trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
 
+
+	// Game loop
 	while (!glfwWindowShouldClose(window))
 	{
 	
@@ -159,6 +145,15 @@ int main()
 
 		//Activate shader
 		oeShader.use_program();
+
+		/*GLuint transformLoc = glGetUniformLocation(oeShader.Program, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));*/
+
+		glm::mat4 transform;
+		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+		transform = glm::rotate(transform, (GLfloat)glfwGetTime() * 5.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+		GLint transformLoc = glGetUniformLocation(oeShader.Program, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
 		//bind Textures using texture units
 		glActiveTexture(GL_TEXTURE0);
@@ -174,6 +169,8 @@ int main()
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
+
+
 
 		glfwSwapBuffers(window);
 	}
