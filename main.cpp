@@ -1,8 +1,17 @@
 /*
-commit : basic transformation
+commit : transformation exercise
 
-description: previously , just finished texture chapter. ready to jump into transformation.
-at the same time, add math lib into the project
+1. [done]
+Using the latest transformtion on the container, 
+try switching the order around by first rotation and then translation.
+see what happens and try to reason why this happens.
+
+2. [ 
+Try drawing a second container with anoter call to glDrawElements 
+but place it at a different position using transformations only.
+Make sure this second container is placed at the top-left of the window and instad of 
+rotating, scale it over time.
+
 */
 
 #include <iostream>
@@ -127,13 +136,6 @@ int main()
 	SOIL_free_image_data(image1);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	
-	//Translation test
-	std::cout << "\n\n------transformation test--------------\n";
-	glm::mat4 trans;
-	trans = glm::rotate(trans, 90.0f, glm::vec3(0.0, 0.0, 1.0));
-	trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
-
-
 	// Game loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -143,34 +145,43 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		//Activate shader
-		oeShader.use_program();
+	
 
 		/*GLuint transformLoc = glGetUniformLocation(oeShader.Program, "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));*/
-
-		glm::mat4 transform;
-		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-		transform = glm::rotate(transform, (GLfloat)glfwGetTime() * 5.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-		GLint transformLoc = glGetUniformLocation(oeShader.Program, "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
-
-		//bind Textures using texture units
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture0);
 		glUniform1i(glGetUniformLocation(oeShader.Program, "ourTexture1"), 0);
-
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture1);
 		glUniform1i(glGetUniformLocation(oeShader.Program, "ourTexture2"), 1);
 
-		glUniform1f(glGetUniformLocation(oeShader.Program, "mixValue"), mixValue);
 
+		//Activate shader
+		oeShader.use_program();
+
+		glm::mat4 transform;
+
+		//first container
+		//---------------------------------------------------
+		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+		transform = glm::rotate(transform, (GLfloat)glfwGetTime() * 5.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+		GLint transformLoc = glGetUniformLocation(oeShader.Program, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+		//bind Textures using texture units
+		glUniform1f(glGetUniformLocation(oeShader.Program, "mixValue"), mixValue);
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		//second container
+		//----------------------------------------------------
+		transform = glm::mat4();//reset
+		transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
+		GLfloat scaleAmount = sin(glfwGetTime());
+		transform = glm::scale(transform, glm::vec3(scaleAmount, scaleAmount, scaleAmount));
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
-
-
 
 		glfwSwapBuffers(window);
 	}
